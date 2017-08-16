@@ -18,6 +18,9 @@ using namespace std;
 #include <unistd.h>
 #include <climits>
 
+// for mpi wrapper
+// #include <mpi.h>
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -454,6 +457,10 @@ void run_motif(char* graph_file, int motif,
 
 int main(int argc, char** argv)
 {
+  
+    // make a mpi wrapper
+    // MPI_Init(&argc, &argv);
+
     // remove buffer so all outputs show up before crash
     setbuf(stdout, NULL);
 
@@ -579,5 +586,7 @@ int main(int argc, char** argv)
                 verbose);
     }
 
+    //make a mpi wrapper
+    // MPI_Finalize();
     return 0;
 }

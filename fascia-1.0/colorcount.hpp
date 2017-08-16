@@ -5,6 +5,10 @@
 
 #include "Random123/philox.h"
 
+//for vtune profiling
+#include <iostream>
+#include <fstream>
+
 using namespace std;
 
 class colorcount{
@@ -98,6 +102,12 @@ if (verbose) {
 }
 
     // begin the counting    
+    // insert the snippet for triggering vtune profiling
+    ofstream vtune_trigger;
+    vtune_trigger.open("vtune-flag.txt");
+    vtune_trigger << "Start training process and trigger vtune profiling.\n";
+    vtune_trigger.close();
+
     double count = 0.0;      
     for (cur_iter = 0; cur_iter < N; cur_iter++)
     {
@@ -235,7 +245,8 @@ if (verbose) {
     printf("\nDone with initialization. Doing full count\n");
 } 
     // do the count for the full template    
-    float full_count = 0;
+    // float full_count = 0;
+    double full_count = 0;
     set_count = 0;
     total_count = 0;
     read_count = 0;
@@ -272,7 +283,7 @@ if (verbose) {
     printf("Full Count: %e\n", full_count);
 }
 #endif
-    return (double)full_count;
+    return full_count;
   }
   
   void init_table_node(int s)
@@ -313,9 +324,9 @@ if (verbose) {
     set_count = set_count_loop;
   }
   
-  float colorful_count(int s)
+  double colorful_count(int s)
   {
-    float cc = 0.0;
+    double cc = 0.0;
     int num_verts_sub = subtemplates[s].num_vertices();
     
     int active_index = part.get_active_index(s);
@@ -363,19 +374,20 @@ if (verbose) {
                                 choose_table[num_colors][num_verts_sub];
           for (int n = 0; n < num_combinations_verts_sub; ++n)
           {
-            float color_count = 0.0;                
+            // float color_count = 0.0;                
+            double color_count = 0.0;                
             int* comb_indexes_a = comb_num_indexes[0][s][n];
             int* comb_indexes_p = comb_num_indexes[1][s][n];
 
             int p = num_combinations - 1;
             for (int a = 0; a < num_combinations; ++a, --p) 
             {
-              int count_a = counts_a[comb_indexes_a[a]];
+              float count_a = counts_a[comb_indexes_a[a]];
               if (count_a) 
               {
                 for (int i = 0; i < valid_nbrs_count; ++i) 
                 {
-                  color_count += count_a * 
+                  color_count += ((double)count_a)* 
                       dt.get_passive(valid_nbrs[i], comb_indexes_p[p]);
 #if COLLECT_DATA                  
                   ++read_count_loop;
@@ -391,7 +403,7 @@ if (verbose) {
               ++set_count_loop;
 #endif              
               if (s != 0)
-                dt.set(v, comb_num_indexes_set[s][n], color_count);
+                dt.set(v, comb_num_indexes_set[s][n], (float)color_count);
               else if (do_graphlet_freq || do_vert_output)
                 final_vert_counts[v] += (double)color_count;
             }
